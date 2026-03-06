@@ -20,6 +20,9 @@ module.exports = {
           "event": "/starting server.+(http:\/\/[a-zA-Z0-9.]+:[0-9]+)/i",
           "done": true
         }, {
+          "event": "/\\[ComfyUI-Manager\\] Restarting to reapply dependency installation/",
+          "kill": true
+        }, {
           "event": "/errno/i",
           "break": false
         }, {
