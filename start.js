@@ -62,7 +62,6 @@ module.exports = {
       id: "set_url",
       method: "local.set",
       params: {
-        url: "{{input.event[1]}}"
         url: "{{input.url}}"
       }
     }
