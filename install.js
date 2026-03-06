@@ -16,6 +16,7 @@ module.exports = {
         path: "app",
         message: [
           "uv pip install -r requirements.txt",
+          "uv pip install -r manager_requirements.txt",
           "uv pip install -U bitsandbytes"
         ]
       }
@@ -79,7 +80,7 @@ module.exports = {
         },
         path: "app",
         message: [
-          "{{platform === 'win32' && gpu === 'amd' ? 'python main.py --directml' : 'python main.py'}}"
+          "{{platform === 'win32' && gpu === 'amd' ? 'python main.py --directml --enable-manager' : 'python main.py --enable-manager'}}"
         ],
         on: [{
           "event": "/http:\/\/[a-zA-Z0-9.]+:[0-9]+/",
