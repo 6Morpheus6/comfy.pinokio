@@ -21,5 +21,15 @@ module.exports = {
         "uv pip install -U bitsandbytes"
       ],
     }
+  }, {
+    method: "script.start",
+    params: {
+      uri: "torch.js",
+      params: {
+        venv: "env",
+        path: "app",
+        // xformers: true
+      }
+    }
   }]
 }
