@@ -8,9 +8,10 @@ module.exports = {
     }
   }],
   restart: [{
-    method: "notify",
+    method: "input",
     params: {
-      html: "Auto-restarting comfyui to apply changes. Stand by..."
+      title: "Restart ComfyUI",
+      description: "Comfyui needs to restart to apply changes."
     }
   }, {
     method: "script.restart"
