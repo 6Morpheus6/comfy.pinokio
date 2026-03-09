@@ -1,53 +1,63 @@
-(() => {
-  if (window.__pinokioComfyDomInstalled) return
-  window.__pinokioComfyDomInstalled = true
-  const parseDownloadContext = (button) => {
-    const url = (button.getAttribute("title") || "").trim()
-    if (!/^https?:\/\//i.test(url)) return null
+window.$pinokio.inject({
+  mount(ctx) {
+    const parseLabel = (text) => {
+      const label = (text || "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
+      if (!label) return null
 
-    const row = button.closest('li[role="option"], [data-pc-section="option"], .p-listbox-option')
-    if (!row) return null
+      const splitAt = label.lastIndexOf(" / ")
+      if (splitAt <= 0 || splitAt >= label.length - 3) return null
 
-    const span = Array.from(row.querySelectorAll("span")).find((node) => /\s\/\s/.test((node.textContent || "").trim()))
-    if (!span) return null
+      const savePath = label.slice(0, splitAt).trim()
+      const filename = label.slice(splitAt + 3).trim()
+      if (!savePath || !filename) return null
 
-    const label = (span.textContent || "").trim()
-    const sep = label.indexOf(" / ")
-    if (sep <= 0) return null
+      return { savePath, filename, label }
+    }
 
-    const savePath = label.slice(0, sep).trim()
-    if (!savePath) return null
+    const parseDownloadContext = (target) => {
+      const button = target.closest('li[data-pc-section="option"] button[title], li[role="option"] button[title], .p-listbox-option button[title]')
+      if (!button) return null
 
-    const urlPath = new URL(url).pathname
-    const filename = decodeURIComponent(urlPath.split("/").pop() || "").trim()
-    if (!filename) return null
+      const text = `${button.textContent || ""} ${button.getAttribute("aria-label") || ""}`.toLowerCase()
+      if (!text.includes("download") || text.includes("copy")) {
+        return null
+      }
 
-    return { url, savePath, filename, label }
+      const row = button.closest('li[data-pc-section="option"], li[role="option"], .p-listbox-option')
+      if (!row) return null
+
+      const url = (button.getAttribute("title") || "").trim()
+      if (!/^https?:\/\//i.test(url)) return null
+
+      const labelNode = row.querySelector('span[title^="http://"], span[title^="https://"]')
+      const label = parseLabel((labelNode || row).textContent || "")
+      if (!label) return null
+
+      return { url, ...label }
+    }
+
+    const onClick = (event) => {
+      const target = event.target && typeof event.target.closest === "function"
+        ? event.target
+        : null
+      if (!target) return
+
+      const payload = parseDownloadContext(target)
+      if (!payload) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      event.stopImmediatePropagation()
+
+      ctx.trigger("trigger-download", payload, { source: "extension.js" })
+    }
+
+    document.addEventListener("click", onClick, true)
+
+    return () => {
+      document.removeEventListener("click", onClick, true)
+    }
   }
-
-  document.addEventListener("click", (event) => {
-    const button = event.target && typeof event.target.closest === "function"
-      ? event.target.closest("button")
-      : null
-    if (!button) return
-
-    const text = (button.textContent || "").trim().toLowerCase()
-    if (!text.includes("download")) return
-
-    event.preventDefault()
-    event.stopPropagation()
-    event.stopImmediatePropagation()
-
-    const payload = parseDownloadContext(button)
-    if (!payload) {
-      return
-    }
-
-    const api = window.$pinokio
-    if (!api || typeof api.emit !== "function") {
-      return
-    }
-
-    api.emit("trigger-download", payload, { source: "extension.js" })
-  }, true)
-})()
+})
