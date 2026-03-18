@@ -8,12 +8,12 @@ module.exports = {
     "trigger-download": {
       ui: {
         mode: "bottom",
-        title: "Downloading model",
+        title: "Downloading models",
         open: "auto",
         closeOnSuccess: true,
         refreshOnClose: "source"
       },
-      href: "downloader.json"
+      href: "downloader.js"
     },
   },
   menu: async (kernel, info) => {
