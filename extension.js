@@ -1,39 +1,71 @@
 window.$pinokio.inject({
   mount(ctx) {
-    const parseLabel = (text) => {
-      const label = (text || "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
-      if (!label) return null
+    const DIALOG_KEY = "global-missing-models-warning"
+    const DIALOG_SELECTOR = `[role="dialog"][aria-labelledby="${DIALOG_KEY}"]`
 
-      const splitAt = label.lastIndexOf(" / ")
-      if (splitAt <= 0 || splitAt >= label.length - 3) return null
+    const normalizeText = (text) => (text || "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
 
-      const savePath = label.slice(0, splitAt).trim()
-      const filename = label.slice(splitAt + 3).trim()
-      if (!savePath || !filename) return null
+    const getDialogDownloadItems = () => {
+      const app = document.getElementById("vue-app")?.__vue_app__
+      if (!app) return []
 
-      return { savePath, filename, label }
-    }
+      let pinia = app.config?.globalProperties?.$pinia || null
+      if (!pinia) {
+        const provides = app._context?.provides
+        if (!provides) return []
 
-    const parseDownloadContext = (target) => {
-      const button = target.closest('li[data-pc-section="option"] button[title], li[role="option"] button[title], .p-listbox-option button[title]')
-      if (!button) return null
-
-      const text = `${button.textContent || ""} ${button.getAttribute("aria-label") || ""}`.toLowerCase()
-      if (!text.includes("download") || text.includes("copy")) {
-        return null
+        for (const key of Reflect.ownKeys(provides)) {
+          const value = provides[key]
+          if (value && typeof value === "object" && value._s instanceof Map) {
+            pinia = value
+            break
+          }
+        }
       }
 
-      const row = button.closest('li[data-pc-section="option"], li[role="option"], .p-listbox-option')
-      if (!row) return null
+      if (!pinia || !(pinia._s instanceof Map)) {
+        return []
+      }
 
-      const url = (button.getAttribute("title") || "").trim()
-      if (!/^https?:\/\//i.test(url)) return null
+      const dialogStore = pinia._s.get("dialog")
+      const dialogStack = Array.isArray(dialogStore?.dialogStack) ? dialogStore.dialogStack : []
+      const dialog = dialogStack.find((item) => item && item.key === DIALOG_KEY)
+      if (!dialog) return []
 
-      const labelNode = row.querySelector('span[title^="http://"], span[title^="https://"]')
-      const label = parseLabel((labelNode || row).textContent || "")
-      if (!label) return null
+      const payload = dialog.contentProps || dialog.footerProps
+      if (!Array.isArray(payload?.missingModels) || !payload?.paths || typeof payload.paths !== "object") {
+        return []
+      }
 
-      return { url, ...label }
+      const items = []
+      const seen = new Set()
+
+      for (const model of payload.missingModels) {
+        if (!model || typeof model !== "object") continue
+
+        const url = normalizeText(model.url)
+        const filename = normalizeText(model.name)
+        const directory = normalizeText(model.directory)
+        if (!/^https?:\/\//i.test(url) || !filename || !directory) continue
+
+        const modelPaths = payload.paths[directory]
+        const savePath = Array.isArray(modelPaths) && typeof modelPaths[0] === "string"
+          ? modelPaths[0].trim()
+          : ""
+        if (!savePath) continue
+
+        const key = `${url}\n${filename}\n${savePath}`
+        if (seen.has(key)) continue
+        seen.add(key)
+
+        items.push({
+          url: model.url,
+          filename: model.name,
+          savePath,
+        })
+      }
+
+      return items
     }
 
     const onClick = (event) => {
@@ -42,8 +74,16 @@ window.$pinokio.inject({
         : null
       if (!target) return
 
-      const payload = parseDownloadContext(target)
-      if (!payload) {
+      const footer = target.closest(`${DIALOG_SELECTOR} [data-pc-section="footer"]`)
+      if (!footer) return
+
+      const button = target.closest("button")
+      if (!button || button !== footer.querySelector("button:last-of-type")) {
+        return
+      }
+
+      const items = getDialogDownloadItems()
+      if (!items.length) {
         return
       }
 
@@ -51,7 +91,7 @@ window.$pinokio.inject({
       event.stopPropagation()
       event.stopImmediatePropagation()
 
-      ctx.trigger("trigger-download", payload, { source: "extension.js" })
+      ctx.trigger("trigger-download", { items }, { source: "extension.js" })
     }
 
     document.addEventListener("click", onClick, true)
