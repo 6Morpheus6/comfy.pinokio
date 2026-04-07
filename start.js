@@ -4,7 +4,8 @@ module.exports = {
   set: [{
     method: "local.set",
     params: {
-      url: "{{input.event[1]}}"
+//      url: "{{input.event[1]}}"
+      url: "http://localhost:8188"
     }
   }],
   restart: [{
