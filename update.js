@@ -19,6 +19,7 @@ module.exports = {
         "uv pip install -r requirements.txt",
         "uv pip install -r manager_requirements.txt",
         "uv pip install -U bitsandbytes --no-deps",
+        "uv pip install matrix-nio"
       ],
     }
   }, {
