@@ -48,7 +48,7 @@ module.exports = {
         "venv_python": "{{args && args.venv_python ? args.venv_python : null}}",
         "venv": "{{args && args.venv ? args.venv : null}}",
         "path": "{{args && args.path ? args.path : '.'}}",
-        "message": "uv pip install --pre torch torchvision torchaudio --index-url https://rocm.nightlies.amd.com/v2-staging/gfx103X-dgpu --force-reinstall"
+        "message": "uv pip install --pre torch torchvision torchaudio --index-url https://rocm.nightlies.amd.com/v2-staging/gfx101X-dgpu --force-reinstall"
       },
       "next": null
     },
@@ -108,7 +108,7 @@ module.exports = {
       },
       "next": null
     },
-    // TRIX HALO (8060s / gfx1151)
+    // STRIX HALO (8060s / gfx1151)
     {
       "when": "{{platform === 'win32' && gpu === 'amd' && /^gfx1151$/.test(gpu_target)}}",
       "method": "shell.run",
@@ -138,9 +138,10 @@ module.exports = {
       "when": "{{platform === 'linux' && gpu === 'nvidia' &&  gpu_target === 'sm_61'}}",
       "method": "shell.run",
       "params": {
+        "bluefairy": "off",
         "venv": "{{args && args.venv ? args.venv : null}}",
         "path": "{{args && args.path ? args.path : '.'}}",
-        "message": "uv pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 {{args && args.xformers ? 'xformers==0.0.32.post2' : ''}} --index-url https://download.pytorch.org/whl/cu128 --force-reinstall --no-deps"
+        "message": "uv pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 {{args && args.xformers ? 'xformers==0.0.32.post2' : ''}} --index-url https://download.pytorch.org/whl/cu128 --force-reinstall"
       },
       "next": null
     },
@@ -149,13 +150,14 @@ module.exports = {
       "when": "{{platform === 'linux' && gpu === 'nvidia' &&  gpu_target === 'sm_75'}}",
       "method": "shell.run",
       "params": {
+        "bluefairy": "off",
         "venv": "{{args && args.venv ? args.venv : null}}",
         "path": "{{args && args.path ? args.path : '.'}}",
-        "message": "uv pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 {{args && args.xformers ? 'xformers==0.0.35' : ''}} --index-url https://download.pytorch.org/whl/cu130 --force-reinstall --no-deps"
+        "message": "uv pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 {{args && args.xformers ? 'xformers==0.0.35' : ''}} --index-url https://download.pytorch.org/whl/cu130 --force-reinstall"
       },
       "next": null
     },
-    // linux nvidia
+    // linux nvidia RTX30 - RTX60 PRO
     {
       "when": "{{gpu === 'nvidia' && platform === 'linux' && /^sm_(86|89|90|120)$/.test(gpu_target)}}",
       "method": "shell.run",
@@ -168,6 +170,22 @@ module.exports = {
           "uv pip install triton==3.6.0.post26",
           "uv pip install https://github.com/Comfy-Org/wheels/releases/download/sageattention-latest/sageattention-2.2.0%2Bcu130torch2.10-cp310-cp310-manylinux_2_34_x86_64.manylinux_2_35_x86_64.whl",
           "uv pip install https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.8.2/flash_attn_3-3.0.0+cu130torch2.10gite2743ab-cp39-abi3-linux_x86_64.whl"
+        ]
+      },
+      "next": null
+    },
+    // linux nvidia DGX Spark
+    {
+      "when": "{{gpu === 'nvidia' && platform === 'linux' && gpu_target === 'sm_121'}}",
+      "method": "shell.run",
+      "params": {
+        "bluefairy": "off",
+        "venv": "{{args && args.venv ? args.venv : null}}",
+        "path": "{{args && args.path ? args.path : '.'}}",
+        "message": [
+          "uv pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 {{args && args.xformers ? 'xformers==0.0.35' : ''}} --index-url https://download.pytorch.org/whl/cu130 --force-reinstall",
+          "uv pip install triton==3.6.0.post26",
+          "uv pip install https://github.com/mjun0812/flash-attention-prebuild-wheels/releases/download/v0.9.12/flash_attn_3-3.0.0+cu130torch2.10gite2743ab-cp39-abi3-linux_aarch64.whl"
         ]
       },
       "next": null

@@ -36,6 +36,10 @@ module.exports = {
       "method": "fs.link",
       "params": {
         "drive": {
+          "diffusion_models": "app/models/diffusion_models",
+          "text_encoders": "app/models/text_encoders",
+          "latent_upscale_models": "app/models/latent_upscale_models",
+          "audio_encoders": "app/models/audio_encoders",
           "checkpoints": "app/models/checkpoints",
           "clip": "app/models/clip",
           "clip_vision": "app/models/clip_vision",
@@ -43,9 +47,10 @@ module.exports = {
           "controlnet": "app/models/controlnet",
           "embeddings": "app/models/embeddings",
           "loras": "app/models/loras",
+          "model_patches": "app/models/model_patches",
           "upscale_models": "app/models/upscale_models",
           "vae": "app/models/vae",
-          "vae_approx": "app/models/VAE-approx",
+          "vae_approx": "app/models/vae_approx",
           "diffusers": "app/models/diffusers",
           "unet": "app/models/unet",
           "hypernetworks": "app/models/hypernetworks",
@@ -58,7 +63,10 @@ module.exports = {
           "https://github.com/cocktailpeanutlabs/automatic1111.git",
           "https://github.com/cocktailpeanutlabs/fooocus.git",
           "https://github.com/cocktailpeanutlabs/comfyui.git",
-          "https://github.com/pinokiofactory/stable-diffusion-webui-forge.git"
+          "https://github.com/pinokiofactory/comfy.git",
+          "https://github.com/pinokiofactory/stable-diffusion-webui-forge.git",
+          "https://github.com/pinokiofactory/MagicQuill.git",
+          "https://github.com/6Morpheus6/forge-neo.git"
         ]
       }
     },
