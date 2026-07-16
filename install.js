@@ -17,7 +17,7 @@ module.exports = {
         message: [
           "uv pip install -r requirements.txt",
           "uv pip install -r manager_requirements.txt",
-          "uv pip install -U bitsandbytes"
+          "uv pip install -U bitsandbytes --no-deps"
         ]
       }
     },
